@@ -1,6 +1,6 @@
-from scipy.io import wavfile
+import librosa
 from scipy.signal import *
-import numpy as np
+
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -16,22 +16,15 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     return y
 
 
-def signal_downSample(signal, downsampleRate):
-    i = 0
-    signal_length = len(signal)
-    new_sig_list = []
-    while i < signal_length:
-        new_sig_list.append(signal[i])
-        i += downsampleRate
-    return np.array(new_sig_list)
+# Chose to use scipy.signal.decimate to perform downsampling as supposed to direct implementation like Fireaizen et al
+def signal_downSample(signal, downsampleFactor):
+    return decimate(signal,downsampleFactor, ftype='fir')
 
-def import_audio_signal(filename):
-    fs,data = wavfile.read(filename)
-    try:
-        signal1 = data[:, 0]
-        signal2 = data[:, 1]
-    except:
-        sig = data[:]
-        signal1=sig
-        signal2= sig
-    return fs, signal1, signal2
+
+def import_audio_signal(filename, startTime: float = 0, duration: float = 30):
+    data, sampleRate = librosa.load(filename,
+                                    sr=None,  # We will implement downsampling using scipy instead
+                                    mono=True,
+                                    offset=startTime,
+                                    duration=duration)
+    return data, sampleRate
