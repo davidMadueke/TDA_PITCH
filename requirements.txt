@@ -1,6 +1,5 @@
-python>=3.9.0
 giotto_tda==0.6.0
-gudhi==3.9.0
+gudhi>=3.8.0
 librosa==0.10.1
 matplotlib==3.8.2
 numpy==1.26.3

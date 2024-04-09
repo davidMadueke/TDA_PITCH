@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 class WaveformToLogSpecgram:
-    def __init__(self, sample_rate, n_fft, fmin, bins_per_octave, freq_bins, frane_len, hop_length=160):  # , device
+    def __init__(self, sample_rate, n_fft, fmin, bins_per_octave, freq_bins, frane_len, hop_length=320):  # , device
 
         e = freq_bins / bins_per_octave
         fmax = fmin * (2 ** e)
@@ -68,10 +68,12 @@ class WaveformToLogSpecgram:
         # => [num_frames x n_fft//2 x 1]
         # specgram = torch.unsqueeze(specgram, dim=2)
 
-        # => [b x freq_bins x T]
+        # => [b x T x freq_bins]
         specgram = specgram[:, :, self.log_idxs_floor] * self.log_idxs_floor_w + specgram[:, :,
                                                                                  self.log_idxs_ceiling] * self.log_idxs_ceiling_w
 
+        # => [b x freq_bins x T]
+        specgram = torch.transpose(specgram, 1, 2)
         specgram_db = self.amplitude_to_db(specgram)
         # specgram_db = specgram_db[:, :, :-1] # remove the last frame.
         # specgram_db = specgram_db.permute([0, 2, 1])
