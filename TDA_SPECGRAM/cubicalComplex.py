@@ -1,4 +1,5 @@
 from gudhi.cubical_complex import CubicalComplex
+from gudhi.persistence_graphical_tools import plot_persistence_diagram, plot_persistence_barcode
 import gudhi
 from TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
 import torch
@@ -24,15 +25,15 @@ class CubicalComplex:
 
 
 if __name__ == '__main__':
-    INPUT_PATH = 'assets/trial1.wav'
+    INPUT_PATH = 'assets/A2_220Hz.wav'
 
     # Get the absolute path to the audio file
     INPUT_PATH = os.path.join(os.path.dirname(__file__), INPUT_PATH)
 
     waveform, sampleRate = librosa.load(INPUT_PATH,
-                                    sr=16000,  # We will implement downsampling using scipy instead
+                                    sr=16000,
                                     mono=True,
-                                    offset=30,
+                                    offset=0,
                                     duration=2)
     specgram = WaveformToLogSpecgram(
         sample_rate=sampleRate,
@@ -43,18 +44,31 @@ if __name__ == '__main__':
         frane_len=1024
     ).process(waveforms=np.array(waveform))
 
-    #specgram = librosa.feature.melspectrogram(y=waveform, sr=sampleRate, window='hamming', fmin=27.5, n_fft=512*2).transpose()
-
+    melSpecgram = librosa.feature.melspectrogram(y=waveform,
+                                                 sr=sampleRate,
+                                                 window='hamming',
+                                                 fmin=27.5,
+                                                 n_fft=512*2,
+                                                 center=True,
+                                                 win_length=1024,
+                                                 pad_mode='reflect')
+    melSpecgramScaled = librosa.amplitude_to_db(np.abs(melSpecgram), ref=np.max)
     specgramArray = specgram.numpy().squeeze()
     # NOTE - specgramArray: (num_frames, freq_bins)
 
     fig, ax = plt.subplots()
-    img = librosa.display.specshow(specgramArray, ax=ax)
+    img = librosa.display.specshow(specgramArray, ax=ax, sr=sampleRate, y_axis='log', hop_length=320)
     fig.colorbar(img, ax=ax)
     plt.show()
 
-    complex = CubicalComplex(specgramArray)
+    complex = CubicalComplex(melSpecgram)
     complex.getInfo()
-    print("Persistence of the complex: ", complex.computePersistence())
+    a = complex.computePersistence()
+    persistenceInDim1 = complex.cc.persistence_intervals_in_dimension(1)
+    persistenceInDim0 = complex.cc.persistence_intervals_in_dimension(0)
+    print("Persistence of the complex: ", a)
+
+    plot_persistence_barcode(persistence=persistenceInDim0)
+    plt.show
 
     print('Hello There')
