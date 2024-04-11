@@ -2,6 +2,7 @@ import torch
 import torchaudio
 import math
 import numpy as np
+import librosa
 
 class WaveformToLogSpecgram:
     def __init__(self, sample_rate, n_fft, fmin, bins_per_octave, freq_bins, frane_len, hop_length=320):  # , device
@@ -48,9 +49,8 @@ class WaveformToLogSpecgram:
             waveforms = waveforms[None, :]
 
         # start from the 0
-        # waveform = F.pad(waveform, [self.frame_len//2, 0], mode='reflect')
-        waveform_pad = waveforms[:, :self.frame_len // 2].flip(dims=[1, ])
-        torch.cat([waveform_pad, waveforms], dim=1)
+        # Pad the waveform properly
+        waveform_pad = torch.cat([waveforms[:, :self.frame_len // 2].flip(dims=[1]), waveforms], dim=1)
 
         b, wav_len = waveforms.shape
         assert b == 1
@@ -59,18 +59,24 @@ class WaveformToLogSpecgram:
         for i in range(num_frames):
             begin = i * self.hop_length
             end = begin + self.frame_len
-            batch[:, i, :] = waveforms[:, begin:end]
+            batch[:, i, :] = waveform_pad[:, begin:end]
 
-        waveforms = batch[0,:,:] * self.hamming_window
-        specgram = torch.fft.fft(waveforms)
-        specgram = torch.abs(specgram[:, :, :self.n_fft // 2 + 1])
-        specgram = specgram * specgram
+        batchWaveforms = batch[0, :, :] * self.hamming_window
+        batchWaveforms = batchWaveforms.squeeze(dim=0)  # Remove the batch dimension if it's not needed
+        specgram = torch.stft(batchWaveforms,
+                              n_fft=self.n_fft,
+                              hop_length=self.hop_length,
+                              window=None,
+                              center=False,
+                              return_complex=True).permute(2, 0, 1)
+        specgram = torch.abs(specgram)
+        specgram = specgram**2
         # => [num_frames x n_fft//2 x 1]
         # specgram = torch.unsqueeze(specgram, dim=2)
 
-        # => [b x T x freq_bins]
+        # Interpolate log spectrogram
         specgram = specgram[:, :, self.log_idxs_floor] * self.log_idxs_floor_w + specgram[:, :,
-                                                                                 self.log_idxs_ceiling] * self.log_idxs_ceiling_w
+                                                                              self.log_idxs_ceiling] * self.log_idxs_ceiling_w
 
         # => [b x freq_bins x T]
         specgram = torch.transpose(specgram, 1, 2)
