@@ -22,20 +22,20 @@ class WaveformToLogSpecgram:
 
         idxs = torch.arange(0, freq_bins)  # , device=device
 
-        log_idxs = fmin * (2 ** (idxs / bins_per_octave)) / fre_resolution
+        self.log_idxs = fmin * (2 ** (idxs / bins_per_octave)) / fre_resolution
 
         # Linear interpolation： y_k = y_i * (k-i) + y_{i+1} * ((i+1)-k)
-        self.log_idxs_floor = torch.floor(log_idxs).long()
-        self.log_idxs_floor_w = (log_idxs - self.log_idxs_floor).reshape([1, 1, freq_bins])
-        self.log_idxs_ceiling = torch.ceil(log_idxs).long()
-        self.log_idxs_ceiling_w = (self.log_idxs_ceiling - log_idxs).reshape([1, 1, freq_bins])
+        self.log_idxs_floor = torch.floor(self.log_idxs).long()
+        self.log_idxs_floor_w = (self.log_idxs - self.log_idxs_floor).reshape([1, 1, freq_bins])
+        self.log_idxs_ceiling = torch.ceil(self.log_idxs).long()
+        self.log_idxs_ceiling_w = (self.log_idxs_ceiling - self.log_idxs).reshape([1, 1, freq_bins])
 
         self.waveform_to_specgram = torchaudio.transforms.Spectrogram(n_fft, hop_length=hop_length)  # .to(device)
 
         assert (bins_per_octave % 12 == 0)
         bins_per_semitone = bins_per_octave // 12
 
-        self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB(top_db=80)
+        self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB(top_db=80, stype='magnitude')
         self.frame_len = frane_len
         self.hop_length = hop_length
 
@@ -54,9 +54,9 @@ class WaveformToLogSpecgram:
 
         b, wav_len = waveforms.shape
         assert b == 1
-        num_frames = int((wav_len - self.frame_len) // self.hop_length) + 1
-        batch = torch.zeros([1, num_frames, self.frame_len])
-        for i in range(num_frames):
+        self.num_frames = int((wav_len - self.frame_len) // self.hop_length) + 1
+        batch = torch.zeros([1, self.num_frames, self.frame_len])
+        for i in range(self.num_frames):
             begin = i * self.hop_length
             end = begin + self.frame_len
             batch[:, i, :] = waveform_pad[:, begin:end]
@@ -77,10 +77,12 @@ class WaveformToLogSpecgram:
         # Interpolate log spectrogram
         specgram = specgram[:, :, self.log_idxs_floor] * self.log_idxs_floor_w + specgram[:, :,
                                                                               self.log_idxs_ceiling] * self.log_idxs_ceiling_w
-
         # => [b x freq_bins x T]
         specgram = torch.transpose(specgram, 1, 2)
-        specgram_db = self.amplitude_to_db(specgram)
+
+        specgram_normalised = specgram / torch.max(specgram)
+        specgram_db = self.amplitude_to_db(specgram_normalised)
+        print('debug')
         # specgram_db = specgram_db[:, :, :-1] # remove the last frame.
         # specgram_db = specgram_db.permute([0, 2, 1])
         return specgram_db
