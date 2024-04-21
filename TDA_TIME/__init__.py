@@ -14,7 +14,8 @@ class TDA:
     # Initialising this object will preprocess the audio file in the format needed for the TDA_TIME
     def __init__(self, filename,
                  startTime: float = 0, duration: float = 30,
-                 downsampleFactor: int = 5, debug: bool =True):
+                 downsampleFactor: int = 5, debug: bool =True, shortFileName: str = "default Name"):
+        self.shortFileName = shortFileName
         self.startTime = startTime
         self.duration = duration
         self.downsampleFactor = downsampleFactor
@@ -45,9 +46,8 @@ class TDA:
         return self.cloud
 
     # This method allows for the point cloud to be visualised
-    @staticmethod
-    def viewPointCloud3d(pointCloudVector):
-        figure = pointCloud3d(pointCloudVector)
+    def viewPointCloud3d(self, pointCloudVector):
+        figure = pointCloud3d(pointCloudVector, title=self.shortFileName)
         pio.show(figure)
 
     # Calling this method will perform persistent homology on this point cloud returning a persistence diagram
@@ -60,7 +60,7 @@ class TDA:
         self.alpha_asc = create_alpha_complex(self.cloud)
 
         if showSimplex:
-            getSimplex(self.alpha_asc, fullSTree=False)
+            getSimplex(self.alpha_asc, fullSTree=True)
 
         if self.debug:
             print("Generating Persistence Diagram")
@@ -77,6 +77,7 @@ class TDA:
     # the number of simplices.
     @staticmethod
     def plotHomology(persistenceDiagram, biggerDiagram: bool = False, diagramType: int = 0):
+        # TODO work on the bigger diagram plot
         if biggerDiagram:
             print_bigger_diagram(persistenceDiagram)
         else:

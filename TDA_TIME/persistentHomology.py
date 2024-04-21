@@ -1,8 +1,8 @@
 import gudhi as gd
 
 
-def homology_from_3dcloud(cloud, max_alpha):
-    alpha_asc = create_alpha_complex(cloud, max_alpha_sqrt=max_alpha)
+def homology_from_3dcloud(cloud):
+    alpha_asc = create_alpha_complex(cloud)
     diag = alpha_asc.persistence()
     return diag
 

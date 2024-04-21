@@ -2,18 +2,26 @@ from matplotlib import pyplot as plt
 import gudhi as gd
 from gtda.plotting import plot_point_cloud
 
-
-def pointCloud3d(data, block=True):
+gd.persistence_graphical_tools._gudhi_matplotlib_use_tex = False
+def pointCloud3d(data, title: str ="Generic Title" , block=True):
     #fig = plt.figure()
     #ax2 = fig.add_subplot(111, projection='3d')
     #ax2.scatter(data[:][0], data[:][1], data[:][2])
     #ax2.set_title("Point Cloud projected into 3 Dimensional Euclidean Space")
     #plt.show(block=block)
-    return plot_point_cloud(data, dimension=3)
+    #return plot_point_cloud(data, dimension=3)
+
+    fig = plot_point_cloud(data, dimension=3)
+
+    # Customize the plot (add title )
+    fig.update_layout(
+        title=f"{title}",
+    )
+
+    return fig
 
 
-
-def getSimplex(stree, fullSTree=False, maxFiltered_values: int = 100):
+def getSimplex(stree, fullSTree=False, maxFiltered_values: int = 10000):
     count = 0
     print('Alpha complex is of dimension ', stree.dimension(), ' - ',
           stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
