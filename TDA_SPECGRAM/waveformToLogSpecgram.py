@@ -7,8 +7,9 @@ import librosa
 class WaveformToLogSpecgram:
     def __init__(self, sample_rate, n_fft, fmin, bins_per_octave, freq_bins, frane_len, hop_length=320):  # , device
 
+        self.fmin = fmin
         e = freq_bins / bins_per_octave
-        fmax = fmin * (2 ** e)
+        self.fmax = self.fmin * (2 ** e)
 
         self.n_fft = n_fft
         hamming_window = torch.hann_window(self.n_fft)  # .to(device)
@@ -22,7 +23,7 @@ class WaveformToLogSpecgram:
 
         idxs = torch.arange(0, freq_bins)  # , device=device
 
-        self.log_idxs = fmin * (2 ** (idxs / bins_per_octave)) / fre_resolution
+        self.log_idxs = self.fmin * (2 ** (idxs / bins_per_octave)) / fre_resolution
 
         # Linear interpolation： y_k = y_i * (k-i) + y_{i+1} * ((i+1)-k)
         self.log_idxs_floor = torch.floor(self.log_idxs).long()
@@ -82,7 +83,6 @@ class WaveformToLogSpecgram:
 
         specgram_normalised = specgram / torch.max(specgram)
         specgram_db = self.amplitude_to_db(specgram_normalised)
-        print('debug')
         # specgram_db = specgram_db[:, :, :-1] # remove the last frame.
         # specgram_db = specgram_db.permute([0, 2, 1])
         return specgram_db
