@@ -3,12 +3,14 @@ import copy
 from gudhi.persistence_graphical_tools import plot_persistence_diagram, plot_persistence_barcode
 from gudhi.representations.vector_methods import Landscape
 import gudhi
-from TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
+from TDA_PITCH.TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
 import torch
 import librosa
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+
+gudhi.persistence_graphical_tools._gudhi_matplotlib_use_tex = False
 
 class CubicalComplex:
 
@@ -30,7 +32,7 @@ class CubicalComplex:
 
 
 if __name__ == '__main__':
-    INPUT_PATH = 'assets/A0_55Hz.wav'
+    INPUT_PATH = 'assets/A2_220Hz.wav'
 
     # Get the absolute path to the audio file
     INPUT_PATH = os.path.join(os.path.dirname(__file__), INPUT_PATH)
@@ -67,14 +69,28 @@ if __name__ == '__main__':
     fig.colorbar(img, ax=ax)
     plt.show()
 
-    complex = CubicalComplex(melSpecgram)
+    # NOTE - Reassigned Spectrogram has inherent randomness closer to the low end that could ocurr
+    freqs, times, mags = librosa.reassigned_spectrogram(y=waveform, sr=sampleRate,
+                                                        n_fft=512*2, reassign_times=True,
+                                                        pad_mode='reflect')
+    mags_db = librosa.amplitude_to_db(mags, ref=np.max)
+    fig, ax = plt.subplots(nrows=1, sharex=True, sharey=True)
+    img = librosa.display.specshow(mags_db, x_axis="s", y_axis="log", sr=sampleRate,
+                                   hop_length=512*2 // 4, ax=ax)
+    ax.set(title="Spectrogram", xlabel=None)
+    ax.label_outer()
+    #ax[1].scatter(times, freqs, c=mags_db, cmap="magma", alpha=0.1, s=5)
+    #ax[1].set_title("Reassigned spectrogram")
+    fig.colorbar(img, ax=ax, format="%+2.f dB")
+
+    complex = CubicalComplex(mags_db)
     complex.getInfo()
     a = complex.computePersistence()
     persistenceInDim1 = complex.cc.persistence_intervals_in_dimension(1)
     persistenceInDim0 = complex.cc.persistence_intervals_in_dimension(0)
     print("Persistence of the complex: ", a)
 
-    plot_persistence_diagram(persistence=persistenceInDim0)
+    plot_persistence_diagram(persistence=a)
 
     # Create a meshgrid for plotting
     num_frames = specgramObject.num_frames
@@ -87,14 +103,15 @@ if __name__ == '__main__':
     plt.pcolormesh(X, Y, specgramArray, shading='auto')
     plt.colorbar(label='Magnitude (dB)')
     plt.xlabel('Time (s)')
-    plt.ylabel('Frequency (Hz)')
+    plt.ylabel(f'Frequency indexes relative to {specgramObject.fmin}(Hz)')
     plt.title('Custom Log Spectrogram')
     plt.ylim(specgramObject.log_idxs[0].numpy(), specgramObject.log_idxs[-1].numpy())  # Adjust ylim to match the custom frequency scale
     plt.show()
 
     persistentLandscape = Landscape(
         num_landscapes=5,
-        resolution=10)
+        resolution=10,
+        keep_endpoints=True)
 
     num_diagrams = 1
 
