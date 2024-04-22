@@ -23,7 +23,7 @@ class MIR1K(Dataset):
         Dataset (_type_): return specgram, pitch
     """
     def __init__(self, metadata: pd.DataFrame, spectrogram_setting: SpectrogramSetting):
-        super.__init__()
+        super().__init__()
         self.metadata = metadata
         self.spectrogram_setting = spectrogram_setting
 
@@ -43,7 +43,7 @@ class MIR1K(Dataset):
 # Create the PianoRollEstimatorDataset
 class MuseSyn(Dataset):
     def __init__(self, metadata: pd.DataFrame, spectrogram_setting: SpectrogramSetting):
-        super.__init__()
+        super().__init__()
         self.metadata = metadata
         self.spectrogram_setting = spectrogram_setting
 

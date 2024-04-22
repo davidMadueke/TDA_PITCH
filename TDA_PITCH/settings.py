@@ -19,19 +19,23 @@ class SpectrogramSetting(object):
     refer to metadata/spectrogram_settings.csv for different parameters in experiment.
     """
 
-    type = 'Reassigned_log2'  # select from ['Reassigned_log2', 'STFT_log2', 'mel']
-    types = {"1": 'Reassigned_log2', "2": 'STFT_log2'}
+    types = {"Reassigned Spectrogram": 'Reassigned_log2',
+             "Regular Spectrogram": 'STFT_log2'}
+
+    type = types["Regular Spectrogram"]
     sample_rate = Constants.sample_rate
     win_length = 1024
+    frame_len = 1024
     n_fft = 1024
     n_mels = 256
     bins_per_octave = 12*4
     n_octaves = 8
     n_harms = 6
-    freq_bins = 480
+    freq_bins = 88 * 4
     freq_per_octave = freq_bins / bins_per_octave
     f_min = 27.5
     log2_f_max = f_min * (2 ** freq_per_octave)
+    hop_length = 320
     channels = 1
 
     def to_string(self):

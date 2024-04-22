@@ -14,7 +14,6 @@ from TDA_PITCH.settings import Constants, SpectrogramSetting
 import TDA_PITCH.utilities.utils as ut
 
 
-
 pm.pretty_midi.MAX_TICK = 1e10
 
 
@@ -59,12 +58,13 @@ class PianoRollEstimatorDataModule(BaseDataModule):
 
         print(f'Get {split} metadata, {len(pianos)} pianos')
 
-        metadata_file = f'TDA_PITCH/metadata/cache/{split}-pianos={len(pianos)}.csv'
+        metadata_file = f'metadata/cache/{split}-pianos={len(pianos)}.csv'
         if os.path.exists(metadata_file):
             return pd.read_csv(metadata_file)
 
         metadata = []
-        for i, row in pd.read_csv(f'TDA_PITCH/metadata/MuseSyn{split}.txt').iterrows():
+        print(os.path.isfile(rf'metadata/MuseSyn_{split}.txt'), os.path.abspath(rf'metadata/MuseSyn_{split}.txt'))
+        for i, row in pd.read_csv(rf'metadata/MuseSyn_{split}.txt', header=0).iterrows():
             name = row['name']
             for piano in pianos:
                 # get information for each piece
@@ -83,6 +83,7 @@ class PianoRollEstimatorDataModule(BaseDataModule):
                                  'spectrograms_folder': spectrograms_folder,
                                  'pianoroll_file': pianoroll_file,
                                  'duration': duration})
+                print(f"Adding: , {name}, {piano}, {split}, {duration} ")
 
         # to DataFrame and save metadata
         metadata = pd.DataFrame(metadata)
@@ -135,17 +136,3 @@ class PianoRollEstimatorDataModule(BaseDataModule):
     def get_test_dataset(self):
         return MuseSyn(self.metadata_test, self.spectrogram_setting)
 
-
-if __name__ == '__main__':
-    dataset_folder_1 = r"C:\Users\David\Documents\GitHub\DATASETS FOR PROJECTS\MuseSyn"
-    features_folder_1 = r"C:\Users\David\Documents\GitHub\DATASETS FOR PROJECTS\MuseSyn\features"
-
-    specgram_setting = SpectrogramSetting()
-    data_module_1 = PianoRollEstimatorDataModule(spectrogram_setting=specgram_setting,
-                                                 dataset_folder=dataset_folder_1,
-                                                 feature_folder=features_folder_1)
-
-    data_module_1.prepare_data()
-    trainDataset = data_module_1.get_train_dataset()
-    a = trainDataset[0]
-    print("Hello")
