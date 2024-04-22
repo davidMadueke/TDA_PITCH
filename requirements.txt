@@ -9,3 +9,8 @@ umap==0.1.1
 umap_learn==0.5.5
 torchaudio
 torch==2.0.1
+tensorboard
+lightning
+torchmetrics
+pandas
+pretty_midi

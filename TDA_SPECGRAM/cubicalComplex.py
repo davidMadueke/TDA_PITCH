@@ -50,7 +50,7 @@ if __name__ == '__main__':
         freq_bins=88*4,
         frane_len=1024
     )
-    specgram = specgramObject.process(waveforms=np.array(waveform))
+    specgram = specgramObject.stft_process(waveforms=np.array(waveform))
 
     melSpecgram = librosa.feature.melspectrogram(y=waveform,
                                                  sr=sampleRate,

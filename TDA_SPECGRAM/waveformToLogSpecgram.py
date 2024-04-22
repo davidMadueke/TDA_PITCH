@@ -5,7 +5,7 @@ import numpy as np
 import librosa
 
 class WaveformToLogSpecgram:
-    def __init__(self, sample_rate, n_fft, fmin, bins_per_octave, freq_bins, frane_len, hop_length=320):  # , device
+    def __init__(self, sample_rate, n_fft, fmin, bins_per_octave, freq_bins, frame_len, hop_length=320):  # , device
 
         self.fmin = fmin
         e = freq_bins / bins_per_octave
@@ -37,10 +37,10 @@ class WaveformToLogSpecgram:
         bins_per_semitone = bins_per_octave // 12
 
         self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB(top_db=80, stype='magnitude')
-        self.frame_len = frane_len
+        self.frame_len = frame_len
         self.hop_length = hop_length
 
-    def process(self, waveforms):
+    def stft_process(self, waveforms):
         # inputs: [b x num_frames x frame_len]
         # outputs: [b x num_frames x n_bins]
 
@@ -86,3 +86,6 @@ class WaveformToLogSpecgram:
         # specgram_db = specgram_db[:, :, :-1] # remove the last frame.
         # specgram_db = specgram_db.permute([0, 2, 1])
         return specgram_db
+
+    def reassigned_process(self, waveforms):
+        pass
