@@ -31,7 +31,7 @@ class CubicalComplex:
 
 
 if __name__ == '__main__':
-    INPUT_PATH = 'assets/A2_220Hz.wav'
+    INPUT_PATH = 'assets/trial3.wav'
 
     # Get the absolute path to the audio file
     INPUT_PATH = os.path.join(os.path.dirname(__file__), INPUT_PATH)
@@ -40,16 +40,16 @@ if __name__ == '__main__':
                                     sr=16000,
                                     mono=True,
                                     offset=0,
-                                    duration=None)
+                                    duration=2)
     specgramObject = WaveformToLogSpecgram(
         sample_rate=sampleRate,
         n_fft=512*2,
         fmin=27.5,
         bins_per_octave=12*4,
         freq_bins=88*4,
-        frane_len=1024
+        frame_len=1024
     )
-    specgram = specgramObject.stft_process(waveforms=np.array(waveform))
+    specgram = specgramObject.reassigned_process(waveforms=np.array(waveform))
 
     melSpecgram = librosa.feature.melspectrogram(y=waveform,
                                                  sr=sampleRate,
@@ -94,7 +94,9 @@ if __name__ == '__main__':
     # Create a meshgrid for plotting
     num_frames = specgramObject.num_frames
     frame_len = specgramObject.frame_len
-    time = np.arange(num_frames) * (frame_len / sampleRate)  # Time in seconds
+    hop_len = specgramObject.hop_length
+    time = np.arange(num_frames) * (hop_len / sampleRate)  # Time in seconds
+    reassigned_times = specgramObject.reassignedtimes
     X, Y = np.meshgrid(time, specgramObject.log_idxs)
 
     # Plot the spectrogram
