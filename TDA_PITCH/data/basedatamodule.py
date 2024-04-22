@@ -7,9 +7,9 @@ import librosa
 import pandas as pd
 import pretty_midi as pm
 
-from TDA_PITCH.TDA_PITCH.settings import Constants, TrainingParam
-from TDA_PITCH.TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
-import TDA_PITCH.TDA_PITCH.utilities.utils as ut
+from TDA_PITCH.settings import Constants, TrainingParam
+from TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
+import TDA_PITCH.utilities.utils as ut
 
 pm.pretty_midi.MAX_TICK = 1e10
 

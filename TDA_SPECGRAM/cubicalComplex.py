@@ -1,9 +1,8 @@
-from gudhi.cubical_complex import CubicalComplex
+import gudhi
 import copy
 from gudhi.persistence_graphical_tools import plot_persistence_diagram, plot_persistence_barcode
 from gudhi.representations.vector_methods import Landscape
-import gudhi
-from TDA_PITCH.TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
+from TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
 import torch
 import librosa
 import os

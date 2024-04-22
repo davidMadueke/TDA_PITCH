@@ -8,7 +8,7 @@ from torch.utils.data.dataset import Dataset
 import pandas as pd
 import numpy as np
 
-from TDA_PITCH.TDA_PITCH.settings import Constants, SpectrogramSetting
+from TDA_PITCH.settings import Constants, SpectrogramSetting
 
 
 # Create the f0-estimator dataset

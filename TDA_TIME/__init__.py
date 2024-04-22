@@ -4,10 +4,10 @@ import time
 import scipy
 from matplotlib import pyplot as plt
 import plotly.io as pio
-from TDA_PITCH.TDA_TIME.preprocessing import *
-from TDA_PITCH.TDA_TIME.dataVisualisation import *
-from TDA_PITCH.TDA_TIME.pointCloud import *
-from TDA_PITCH.TDA_TIME.persistentHomology import *
+from TDA_TIME.preprocessing import *
+from TDA_TIME.dataVisualisation import *
+from TDA_TIME.pointCloud import *
+from TDA_TIME.persistentHomology import *
 
 
 class TDA:
