@@ -31,7 +31,7 @@ class CubicalComplex:
 
 
 if __name__ == '__main__':
-    INPUT_PATH = 'assets/trial3.wav'
+    INPUT_PATH = 'assets/trial4.flac'
 
     # Get the absolute path to the audio file
     INPUT_PATH = os.path.join(os.path.dirname(__file__), INPUT_PATH)
@@ -97,16 +97,16 @@ if __name__ == '__main__':
     hop_len = specgramObject.hop_length
     time = np.arange(num_frames) * (hop_len / sampleRate)  # Time in seconds
     reassigned_times = specgramObject.reassignedtimes
-    X, Y = np.meshgrid(time, specgramObject.log_idxs)
+    X, Y = np.meshgrid(time, specgramObject.log_freqs)
 
     # Plot the spectrogram
     plt.figure(figsize=(10, 6))
     plt.pcolormesh(X, Y, specgramArray, shading='auto')
     plt.colorbar(label='Magnitude (dB)')
     plt.xlabel('Time (s)')
-    plt.ylabel(f'Frequency indexes relative to {specgramObject.fmin}(Hz)')
+    plt.ylabel(f'Log-Frequency (Hz)')
     plt.title('Custom Log Spectrogram')
-    plt.ylim(specgramObject.log_idxs[0].numpy(), specgramObject.log_idxs[-1].numpy())  # Adjust ylim to match the custom frequency scale
+    plt.ylim(specgramObject.log_freqs[0].numpy(), min(specgramObject.log_freqs[-1].numpy(),1000))  # Adjust ylim to match the custom frequency scale
     plt.show()
 
     persistentLandscape = Landscape(
