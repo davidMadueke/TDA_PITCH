@@ -46,6 +46,7 @@ class MuseSyn(Dataset):
         super().__init__()
         self.metadata = metadata
         self.spectrogram_setting = spectrogram_setting
+        self.spectrogram_parameters = None
 
         # Calculate dataset length
         durations = self.metadata['duration'].to_numpy()
@@ -66,25 +67,36 @@ class MuseSyn(Dataset):
             # load spectrogram and pianorolls
             spectrogram_file = os.path.join(row['spectrograms_folder'],
                                             f'{self.spectrogram_setting.to_string()}.pkl')
+            spectrogram_parameters_file = os.path.join(row['spectrograms_folder'],
+                                                       f'{self.spectrogram_setting.to_string()}_parameters.pkl')
             pianoroll_file = row['pianoroll_file']
             spectrogram_full = pickle.load(open(spectrogram_file, 'rb'))
             if len(spectrogram_full.shape) == 2:
                 spectrogram_full = np.expand_dims(spectrogram_full, axis=0)
+            self.spectrogram_parameters = pickle.load(open(spectrogram_parameters_file, 'rb'))
             pianoroll_full = pickle.load(open(pianoroll_file, 'rb'))
 
             # get segment
-            start = index * Constants.input_length
-            end = start + Constants.input_length
-            spectrogram = spectrogram_full[:, :, start:min(spectrogram_full.shape[2], end)]
+            spectrogram_input_length = int(Constants.segment_length * self.spectrogram_setting.sample_rate
+                                           / self.spectrogram_setting.hop_length)
+            spec_start = index * spectrogram_input_length
+            spec_end = spec_start + spectrogram_input_length
+            spectrogram = spectrogram_full[:, :, spec_start:min(spectrogram_full.shape[2], spec_end)]
+
+            start = index * Constants.pianoroll_input_length
+            end = start + Constants.pianoroll_input_length
             pianoroll = pianoroll_full[:, start:min(pianoroll_full.shape[1], end)]
 
             # initialise padded spectrogram and pianoroll
             spectrogram_padded = np.zeros(
-                (spectrogram_full.shape[0], spectrogram_full.shape[1], Constants.input_length), dtype=float)
-            pianoroll_padded = np.zeros((88, Constants.input_length), dtype=float)
-            pianoroll_mask = np.zeros((88, Constants.input_length), dtype=float)
+                (spectrogram_full.shape[0],
+                 spectrogram_full.shape[1], spectrogram_input_length), dtype=float)
+            pianoroll_padded = np.zeros((88, Constants.pianoroll_input_length), dtype=float)
+            pianoroll_mask = np.zeros((88, Constants.pianoroll_input_length), dtype=float)
             # overwrite with values
+            # => [Batch x Freq_Bins x Num_Frames]
             spectrogram_padded[:, :, :spectrogram.shape[2]] = spectrogram
+            self.spectrogram_parameters["num_frames"] = spectrogram_padded.shape[2]
             pianoroll_padded[:, :pianoroll.shape[1]] = pianoroll
             pianoroll_mask[:, :pianoroll.shape[1]] = 1.
 
