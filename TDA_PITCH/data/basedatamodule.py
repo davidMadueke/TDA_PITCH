@@ -40,7 +40,7 @@ class BaseDataModule(pl.LightningDataModule):
 
             # get audio file and spectrogram file
             audio_file = row['audio_file']
-            audio_data, sample_rate = librosa.load(audio_file, sr=Constants.sample_rate)
+            audio_data, sample_rate = self.prepare_audio(audio_file=audio_file)
             spectrogram_file = os.path.join(row['spectrograms_folder'],
                                             f'{spectrogram_setting.to_string()}.pkl')
 

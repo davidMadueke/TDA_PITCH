@@ -1,10 +1,12 @@
 
 class Constants:
+    random_seed = 42 # For all the Pseudorandom RNG generators
     sample_rate = 16000
-    hop_time = 0.01 # For Pretty Midi piano Rolls
-    # TODO change hop_time to be in concordance with specgram hop size
-    segment_length = 2 # transcribe 2s segments at a time
-    input_length = int(segment_length * (1 / hop_time))
+    pianoroll_frame_length = 160
+    pianoroll_hop_time = pianoroll_frame_length / sample_rate # For Pretty Midi piano Rolls
+    segment_length = 2  # transcribe 2s segments at a time
+    pianoroll_input_length = int(segment_length * (1 / pianoroll_hop_time))
+    # i.e desired_frames = desired_duration * sample_rate / frame length
     velocity_threshold = 30
 
     spectrogram_max_length = 802
@@ -22,7 +24,7 @@ class SpectrogramSetting(object):
     types = {"Reassigned Spectrogram": 'Reassigned_log2',
              "Regular Spectrogram": 'STFT_log2'}
 
-    type = types["Regular Spectrogram"]
+    type = types["Reassigned Spectrogram"]
     sample_rate = Constants.sample_rate
     win_length = 1024
     frame_len = 1024
