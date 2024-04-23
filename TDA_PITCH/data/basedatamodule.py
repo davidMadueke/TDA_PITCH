@@ -23,8 +23,8 @@ class BaseDataModule(pl.LightningDataModule):
     def __init__(self):
         super().__init__()
 
-    @staticmethod
-    def prepare_spectrograms(metadata: pd.DataFrame,
+
+    def prepare_spectrograms(self, metadata: pd.DataFrame,
                              spectrogram_setting: Any):
         """Calculate spectrograms and save the pre-calculated features.
 
@@ -66,9 +66,19 @@ class BaseDataModule(pl.LightningDataModule):
                                      f" Valid spectrograms are {spectrogram_setting.types.values()} ")  # Raise an error
             except ValueError as e:
                 print(e)
-            # save feature
+
+            # save key parameters (for visualisation) to a parameters.pkl file
+            spectrogram_parameters_file = os.path.join(row['spectrograms_folder'],
+                                                       f'{spectrogram_setting.to_string()}_parameters.pkl')
+            spectrogram_parameters = {"num_frames": specgram_object.num_frames,
+                                      "hop_length": specgram_object.hop_length,
+                                      "log_freqs": specgram_object.get_log_freqs()}
+
+            # save features and parameters
             ut.mkdir(row['spectrograms_folder'])
             pickle.dump(spectrogram, open(spectrogram_file, 'wb'), protocol=2)
+            if not os.path.exists(spectrogram_parameters_file):
+                pickle.dump(spectrogram_parameters, open(spectrogram_parameters_file, 'wb'), protocol=2)
 
         print()
 

@@ -7,6 +7,11 @@ import librosa
 class WaveformToLogSpecgram:
     def __init__(self, sample_rate, n_fft, fmin, bins_per_octave, freq_bins, frame_len, hop_length=320):  # , device
 
+        self.frame_len = frame_len
+        self.hop_length = hop_length
+        self.num_frames = None
+        self.freq_bins = freq_bins
+        self.bins_per_octave = bins_per_octave
         self.fmin = fmin
         e = freq_bins / bins_per_octave
         self.fmax = self.fmin * (2 ** e)
@@ -20,9 +25,11 @@ class WaveformToLogSpecgram:
         self.sample_rate = sample_rate
         fre_resolution = self.sample_rate / n_fft
 
-        self.idxs = torch.arange(0, freq_bins)  # , device=device
+        #self.freqs = None
+        self.idxs = torch.arange(0, self.freq_bins)  # , device=device
 
         self.log_idxs = self.fmin * (2 ** (self.idxs / bins_per_octave)) / fre_resolution
+        self.log_freq_bins = self.log_idxs.size(dim=0)
 
         # Linear interpolation： y_k = y_i * (k-i) + y_{i+1} * ((i+1)-k)
         self.log_idxs_floor = torch.floor(self.log_idxs).long()
@@ -30,17 +37,27 @@ class WaveformToLogSpecgram:
         self.log_idxs_ceiling = torch.ceil(self.log_idxs).long()
         self.log_idxs_ceiling_w = (self.log_idxs_ceiling - self.log_idxs).reshape([1, freq_bins])
 
+        self.log_freqs = self.get_log_freqs()
+
         self.waveform_to_specgram = torchaudio.transforms.Spectrogram(n_fft, hop_length=hop_length)  # .to(device)
 
-        assert (bins_per_octave % 12 == 0)
+        assert (self.bins_per_octave % 12 == 0)
         bins_per_semitone = bins_per_octave // 12
 
         self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB(top_db=80, stype='magnitude')
-        self.frame_len = frame_len
-        self.hop_length = hop_length
-        self.num_frames = None
 
         self.reassignedtimes = None
+
+    def get_log_freqs(self):
+        #self.freqs = librosa.fft_frequencies(sr=self.sample_rate, n_fft=self.n_fft)
+        #torch_freqs = torch.tensor(self.freqs)
+        #log_freqs = (torch_freqs[self.log_idxs_floor] * self.log_idxs_floor_w.squeeze() +
+        #            torch_freqs[self.log_idxs_ceiling] * self.log_idxs_ceiling_w.squeeze())
+        #log_freqs = torch_freqs[self.log_idxs_floor]
+
+        log_freqs_idxs = torch.arange(0, self.log_freq_bins)
+        log_freqs = self.fmin * (2 ** (log_freqs_idxs / self.bins_per_octave))
+        return log_freqs
 
     def stft_process(self, waveforms):
         # inputs: [num_frames x frame_len]
