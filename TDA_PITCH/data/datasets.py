@@ -119,8 +119,8 @@ class MuseSyn(Dataset):
         self.spectrogram_parameters = None
 
         # Calculate dataset length
-        durations = self.metadata['duration'].to_numpy()
-        self.n_segments_all = np.ceil(durations / Constants.segment_length).astype(int)
+        self.durations = self.metadata['duration'].to_numpy()
+        self.n_segments_all = np.ceil(self.durations / Constants.segment_length).astype(int)
         self.length = np.sum(self.n_segments_all)
 
     def __len__(self):
@@ -147,20 +147,15 @@ class MuseSyn(Dataset):
             pianoroll_full = pickle.load(open(pianoroll_file, 'rb'))
 
             # get segment
-            spectrogram_input_length = int(Constants.segment_length * self.spectrogram_setting.sample_rate
-                                           / self.spectrogram_setting.hop_length)
-            spec_start = index * spectrogram_input_length
-            spec_end = spec_start + spectrogram_input_length
-            spectrogram = spectrogram_full[:, :, spec_start:min(spectrogram_full.shape[2], spec_end)]
-
             start = index * Constants.pianoroll_input_length
             end = start + Constants.pianoroll_input_length
+            spectrogram = spectrogram_full[:, :, start:min(spectrogram_full.shape[2], end)]
             pianoroll = pianoroll_full[:, start:min(pianoroll_full.shape[1], end)]
 
             # initialise padded spectrogram and pianoroll
             spectrogram_padded = np.zeros(
                 (spectrogram_full.shape[0],
-                 spectrogram_full.shape[1], spectrogram_input_length), dtype=float)
+                 spectrogram_full.shape[1], Constants.pianoroll_input_length), dtype=float)
             pianoroll_padded = np.zeros((88, Constants.pianoroll_input_length), dtype=float)
             pianoroll_mask = np.zeros((88, Constants.pianoroll_input_length), dtype=float)
             # overwrite with values
@@ -169,6 +164,6 @@ class MuseSyn(Dataset):
             self.spectrogram_parameters["num_frames"] = spectrogram_padded.shape[2]
             pianoroll_padded[:, :pianoroll.shape[1]] = pianoroll
             pianoroll_mask[:, :pianoroll.shape[1]] = 1.
-
-            return spectrogram_padded, pianoroll_padded, pianoroll_mask
+            return (torch.tensor(spectrogram_padded),
+                    torch.tensor(pianoroll_padded), torch.tensor(pianoroll_mask))
 

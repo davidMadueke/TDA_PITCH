@@ -4,10 +4,12 @@ import torch
 import pytorch_lightning as pl
 from typing import Any, Optional
 import librosa
+import numpy as np
+from scipy.io.wavfile import write
 import pandas as pd
 import pretty_midi as pm
 
-from TDA_PITCH.settings import Constants, TrainingParam
+from TDA_PITCH.settings import Constants, TrainingParams
 from TDA_SPECGRAM.waveformToLogSpecgram import WaveformToLogSpecgram
 import TDA_PITCH.utilities.utils as ut
 
@@ -25,12 +27,14 @@ class BaseDataModule(pl.LightningDataModule):
 
 
     def prepare_spectrograms(self, metadata: pd.DataFrame,
-                             spectrogram_setting: Any):
+                             spectrogram_setting: Any,
+                             debug: bool = False):
         """Calculate spectrograms and save the pre-calculated features.
 
             Args:
                 metadata: metadata to the dataset.
                 spectrogram_setting: the spectrogram setting (type and parameters).
+                debug: For debugging purpose - keep False when not debuggin prep specgrams
             Returns:
                 No return, save pre-calculated features instead.
             """
@@ -41,6 +45,12 @@ class BaseDataModule(pl.LightningDataModule):
             # get audio file and spectrogram file
             audio_file = row['audio_file']
             audio_data, sample_rate = self.prepare_audio(audio_file=audio_file)
+
+            if debug:
+                filename = 'testAudio.wav'
+                data = (audio_data * 32767).astype(np.int16)
+                write(os.path.join(r"enter file path here:", filename), sample_rate, data)
+
             spectrogram_file = os.path.join(row['spectrograms_folder'],
                                             f'{spectrogram_setting.to_string()}.pkl')
 
@@ -88,7 +98,7 @@ class BaseDataModule(pl.LightningDataModule):
         dataset = self.get_train_dataset()
         sampler = torch.utils.data.sampler.RandomSampler(dataset)
         data_loader = torch.utils.data.dataloader.DataLoader(dataset,
-                                                             batch_size=TrainingParam.batch_size,
+                                                             batch_size=TrainingParams.BATCH_SIZE,
                                                              sampler=sampler,
                                                              drop_last=True)
         return data_loader
@@ -99,7 +109,7 @@ class BaseDataModule(pl.LightningDataModule):
         dataset = self.get_valid_dataset()
         sampler = torch.utils.data.sampler.RandomSampler(dataset)
         data_loader = torch.utils.data.dataloader.DataLoader(dataset,
-                                                             batch_size=TrainingParam.batch_size,
+                                                             batch_size=TrainingParams.BATCH_SIZE,
                                                              sampler=sampler,
                                                              drop_last=True)
         return data_loader
