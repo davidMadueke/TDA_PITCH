@@ -29,7 +29,7 @@ def train(dataset_folder, feature_folder,
         experiment_name = f'{task_setting.to_string()}-{spectrogram_setting.to_string()}-base_model'
 
     # get trainer and train
-    logger = pl.loggers.TensorBoardLogger('tensorboard_logs',
+    logger = pl.loggers.TensorBoardLogger('TDA_PITCH/tensorboard_logs',
                                           name=experiment_name,
                                           default_hp_metric=False)
     trainer = pl.Trainer(
