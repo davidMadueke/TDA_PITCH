@@ -120,7 +120,11 @@ class BaseDataModule(pl.LightningDataModule):
         dataset = self.get_test_dataset()
         sampler = torch.utils.data.sampler.RandomSampler(dataset)
         data_loader = torch.utils.data.dataloader.DataLoader(dataset,
-                                                             batch_size=TrainingParam.batch_size,
+                                                             batch_size=TrainingParams.BATCH_SIZE,
                                                              sampler=sampler,
                                                              drop_last=True)
         return data_loader
+
+    def predict_dataloader(self):
+        print('get predict (test) dataloader')
+        return self.test_dataloader()
