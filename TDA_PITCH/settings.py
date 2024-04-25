@@ -61,9 +61,10 @@ class SpectrogramSetting(object):
                              f'n_mels={self.n_mels}'])
 
 
-class TrainingParam:
-    learning_rate = 0.001
-    batch_size = 8
+class TrainingParams:
+    PREPARE_FLAG = True  ### NOTE: ONLY SET THIS FLAG TO True IF YOU KNOW THE FEATURES HAVE BEEN CREATED
+    LEARNING_RATE = 0.001
+    BATCH_SIZE = 8
 
 # We are creating two different networks, a fully connected CNN f0 estimator and a PianoRoll
 # Transcriber Estimator that combines early CNN layers follwoed by Bi-GRU units

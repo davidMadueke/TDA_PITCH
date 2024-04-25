@@ -31,9 +31,9 @@ if __name__ == '__main__':
                                                  dataset_folder=dataset_folder_1,
                                                  feature_folder=features_folder_1)
 
-    data_module_1.prepare_data()
-    trainDataset = data_module_1.get_test_dataset()
-    specgram, pianoroll_padded, pianoroll_mask = trainDataset[1]
+    #data_module_1.prepare_data()
+    #trainDataset = data_module_1.get_test_dataset()
+    #specgram, pianoroll_padded, pianoroll_mask = trainDataset[3]
 
     data_module_2 = F0EstimatorDataModule(spectrogram_setting=specgram_setting,
                                           dataset_folder=dataset_folder_2,
@@ -43,23 +43,23 @@ if __name__ == '__main__':
     specgram2, pitch_vector, pitch_vector_mask = trainDataset2[0]
 
     # Create a meshgrid for plotting
-    num_frames = trainDataset.spectrogram_parameters["num_frames"]
-    log_freqs = trainDataset.spectrogram_parameters["log_freqs"]
-    frame_len = SpectrogramSetting.frame_len
-    hop_len = SpectrogramSetting.hop_length
-    time = np.arange(num_frames) * (hop_len / SpectrogramSetting.sample_rate)  # Time in seconds
-    X, Y = np.meshgrid(time, log_freqs)
+    #num_frames = trainDataset.spectrogram_parameters["num_frames"]
+    #log_freqs = trainDataset.spectrogram_parameters["log_freqs"]
+    #frame_len = SpectrogramSetting.frame_len
+    #hop_len = SpectrogramSetting.hop_length
+    #time = np.arange(num_frames) * (hop_len / SpectrogramSetting.sample_rate)  # Time in seconds
+    #X, Y = np.meshgrid(time, log_freqs)
 
     # Plot the spectrogram
-    plt.figure(figsize=(10, 6))
-    plt.pcolormesh(X, Y, np.squeeze(specgram), shading='auto')
-    plt.colorbar(label='Magnitude (dB)')
-    plt.xlabel('Time (s)')
-    plt.ylabel(f'Log-Frequency (Hz)')
-    plt.title('Log_2 Spectrogram of MuseSyn Truncated Dataset Example')
-    plt.ylim(log_freqs[0].numpy(),
-             min(log_freqs[-1].numpy(), 100000))  # Adjust ylim to match the custom frequency scale
-    plt.show()
+    #plt.figure(figsize=(10, 6))
+    #plt.pcolormesh(X, Y, np.squeeze(specgram), shading='auto')
+    #plt.colorbar(label='Magnitude (dB)')
+    #plt.xlabel('Time (s)')
+    #plt.ylabel(f'Log-Frequency (Hz)')
+    #plt.title('Log_2 Spectrogram of MuseSyn Truncated Dataset Example')
+    #plt.ylim(log_freqs[0].numpy(),
+    #         min(log_freqs[-1].numpy(), 100000))  # Adjust ylim to match the custom frequency scale
+    #plt.show()
 
     ######################################
 
@@ -78,19 +78,19 @@ if __name__ == '__main__':
     plt.xlabel('Time (s)')
     plt.ylabel(f'Log-Frequency (Hz)')
     plt.title('Log_2 Spectrogram of MIR-1K Truncated Dataset Example')
-    plt.ylim(log_freqs[0].numpy(),
-             min(log_freqs[-1].numpy(), 100000))  # Adjust ylim to match the custom frequency scale
+    plt.ylim(log_freqs2[0].numpy(),
+             min(log_freqs2[-1].numpy(), 100000))  # Adjust ylim to match the custom frequency scale
     plt.show()
 
 
     # Plot piano roll
-    fig = plt.figure(figsize=(10, 4))
-    librosa.display.specshow(pianoroll_padded,
-                             sr=1/Constants.pianoroll_hop_time,
-                             x_axis='time', y_axis='linear',
-                             hop_length=SpectrogramSetting.hop_length,
-                             cmap=get_cmap('binary'))
-    plt.title("Piano Roll")
-    plt.tight_layout()
-    plt.show()
-print("Hello")
+    #fig = plt.figure(figsize=(10, 4))
+    #librosa.display.specshow(pianoroll_padded,
+    #                         sr=1/Constants.pianoroll_hop_time,
+    #                         x_axis='time', y_axis='linear',
+    #                         hop_length=SpectrogramSetting.hop_length,
+    #                         cmap=get_cmap('binary'))
+    #plt.title("Piano Roll")
+    #plt.tight_layout()
+    #plt.show()
+    print("Hello")
