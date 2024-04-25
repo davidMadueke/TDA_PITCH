@@ -1,0 +1,11 @@
+giotto_tda==0.6.0
+gudhi>=3.8.0
+librosa==0.10.1
+plotly==5.18.0
+umap==0.1.1
+umap_learn==0.5.5
+tensorboard
+lightning
+pretty_midi
+mir_eval
+pypianoroll
