@@ -1,11 +1,16 @@
 
 class Constants:
-    random_seed = 42 # For all the Pseudorandom RNG generators
+    random_seed = 42  # For all the Pseudorandom RNG generators
+
     sample_rate = 16000
-    pianoroll_frame_length = 160
-    pianoroll_hop_time = pianoroll_frame_length / sample_rate # For Pretty Midi piano Rolls
+    pianoroll_frame_length = 320
+    pianoroll_hop_time = pianoroll_frame_length / sample_rate  # For Pretty Midi piano Rolls
+    pitch_vector_hop_time = 20/1000  # 20 ms hop time converted into samples - for MIR-1K Pitch Contour
+
     segment_length = 2  # transcribe 2s segments at a time
     pianoroll_input_length = int(segment_length * (1 / pianoroll_hop_time))
+    pitch_vector_input_length = int(segment_length * (1 / pitch_vector_hop_time))
+
     # i.e desired_frames = desired_duration * sample_rate / frame length
     velocity_threshold = 30
 
@@ -63,8 +68,9 @@ class TrainingParam:
 # We are creating two different networks, a fully connected CNN f0 estimator and a PianoRoll
 # Transcriber Estimator that combines early CNN layers follwoed by Bi-GRU units
 
-class ModelSetting(object):
-    type = 'f0_Estimator' # select from ['f0_estimator', 'pianoroll_estimator']
+
+class TaskSetting(object):
+    type = 'pianoroll_estimator' # select from ['f0_estimator', 'pianoroll_estimator']
 
     def to_string(self):
         if self.type == 'f0_estimator':

@@ -11,7 +11,7 @@ from torch.utils.data import random_split
 
 from TDA_PITCH.data.basedatamodule import BaseDataModule
 from TDA_PITCH.data.datasets import MuseSyn, MIR1K
-from TDA_PITCH.settings import Constants, SpectrogramSetting
+from TDA_PITCH.settings import Constants, SpectrogramSetting, TrainingParams
 import TDA_PITCH.utilities.utils as ut
 
 
@@ -128,9 +128,10 @@ class PianoRollEstimatorDataModule(BaseDataModule):
 
     def prepare_data(self) -> None:
         # Override prepare_data
-        for metadata in [self.metadata_train, self.metadata_valid, self.metadata_test]:
-            self.prepare_pianorolls(metadata)
-            self.prepare_spectrograms(metadata, self.spectrogram_setting)
+        if not TrainingParams.PREPARE_FLAG:
+            for metadata in [self.metadata_train, self.metadata_valid, self.metadata_test]:
+                self.prepare_pianorolls(metadata)
+                self.prepare_spectrograms(metadata, self.spectrogram_setting)
 
     def get_train_dataset(self):
         return MuseSyn(self.metadata_train, self.spectrogram_setting)

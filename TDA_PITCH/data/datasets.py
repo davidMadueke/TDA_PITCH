@@ -33,8 +33,8 @@ class MIR1K(Dataset):
         self.spectrogram_parameters = None
 
         # Calculate dataset length
-        durations = self.metadata['duration'].to_numpy()
-        self.n_segments_all = np.ceil(durations / Constants.segment_length).astype(int)
+        self.durations = self.metadata['duration'].to_numpy()
+        self.n_segments_all = np.ceil(self.durations / Constants.segment_length).astype(int)
         self.length = np.sum(self.n_segments_all)
 
     def __len__(self):
@@ -63,16 +63,9 @@ class MIR1K(Dataset):
 
 
             # get segment
-            spectrogram_input_length = int(Constants.segment_length * self.spectrogram_setting.sample_rate
-                                           / self.spectrogram_setting.hop_length)
-            spec_start = index * spectrogram_input_length
-            spec_end = spec_start + spectrogram_input_length
-            spectrogram = spectrogram_full[:, :, spec_start:min(spectrogram_full.shape[2], spec_end)]
-
-            pitch_hop_size = 10 / 1000  # 10ms spacing between frames (see MIR-1K Documentation)
-            pitch_input_length = int(Constants.segment_length / pitch_hop_size)
-            start = index * pitch_input_length
-            end = start + pitch_input_length
+            start = index * Constants.pitch_vector_input_length
+            end = start + Constants.pitch_vector_input_length
+            spectrogram = spectrogram_full[:, :, start:min(spectrogram_full.shape[2], end)]
             pitch_vector = pitch_vector_full[start:min(pitch_vector_full.shape[0], end)]
             # => [freq_bins x T]
             pitch_vector_onehot = self.hz_to_onehot(pitch_vector,
@@ -83,12 +76,12 @@ class MIR1K(Dataset):
             # initialise padded spectrogram and pitch_vector
             spectrogram_padded = np.zeros(
                 (spectrogram_full.shape[0],
-                 spectrogram_full.shape[1], spectrogram_input_length), dtype=float)
+                 spectrogram_full.shape[1], Constants.pitch_vector_input_length), dtype=float)
             pitch_vector_padded = np.zeros((self.spectrogram_setting.freq_bins,
-                                            pitch_input_length),
+                                            Constants.pitch_vector_input_length),
                                            dtype=float)
             pitch_vector_mask = np.zeros((self.spectrogram_setting.freq_bins,
-                                        pitch_input_length),
+                                        Constants.pitch_vector_input_length),
                                            dtype=float)
             # overwrite with values
             # => [Batch x Freq_Bins x Num_Frames]
